@@ -27,6 +27,7 @@ LG.page.onAlert = (function(msg) {
 
 LG.tempURLObject = {}; // holds the list of visited URL for internal use
 LG.finalOutputArray = []; // holds the final output list of URL
+LG.urlCounter = 0;
 
 LG.validate = {};
 LG.validate.url = (function(url) {
@@ -36,7 +37,8 @@ LG.validate.url = (function(url) {
 
 LG.grab = {};
 LG.grab.begin = (function() {
-
+    LG.finalOutputArray.push(Object.keys(LG.tempURLObject)[0]);
+    
 });
 
 // set the values from command line input
@@ -66,6 +68,7 @@ LG.grab.begin = (function() {
         LG.config.pattern = system.args[4];   
     }
     LG.tempURLObject[LG.config.url] = {};
+    LG.tempURLObject[LG.config.url].visited = 0;
     LG.grab.begin();
 })();
 
