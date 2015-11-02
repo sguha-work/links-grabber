@@ -1,0 +1,35 @@
+{
+  "name": "links-grabber",
+  "version": "0.0.1",
+  "description": "This tool is for listing all of the links in your website",
+  "main": "lg.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sguha-work/links-grabber.git"
+  },
+  "keywords": [
+    "link",
+    "grabber",
+    "crawler",
+    "seo"
+  ],
+  "files" : [
+    "lg.js",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
+  "dependencies": {
+    "fs": "0.0.2",
+    "phantomjs": "1.9.18"
+  },
+  "author": "Angshu Guha",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sguha-work/links-grabber/issues"
+  },
+  "homepage": "https://github.com/sguha-work/links-grabber"
+}
