@@ -28,17 +28,82 @@ LG.page.onAlert = (function(msg) {
 LG.tempURLObject = {}; // holds the list of visited URL for internal use
 LG.finalOutputArray = []; // holds the final output list of URL
 LG.urlCounter = 0;
+LG.timer = null;
 
 LG.validate = {};
 LG.validate.url = (function(url) {
     return true;
 });
+LG.validate.isInternalUrl = (function(url) {
+    return true;
+});
 
+LG.prepareFullURL = (function(url){
+    if(LG.config.url[LG.config.url.length-1]=="/") {
+        return LG.config.url+url.substr(1);
+    } else {
+        return LG.config.url+url; 
+    }
+});
+
+LG.finalize = {};
+LG.finalize.prepareFinalOutput = (function() {
+    console.log("done");
+    phantom.exit();
+});
 
 LG.grab = {};
+LG.grab.allURLsOfPage = (function() {console.log("hello");
+    LG.page.evaluate(function(){
+        var anchors = document.getElementsByTagName('a'), 
+            index, 
+            singleAnchor, 
+            href;
+        for(index in anchors) {
+            singleAnchor = anchors[index];
+            href = singleAnchor.getAttribute('href');
+            if(typeof href != "undefined"&&href!=""&&href.indexOf("javascript:void(0)")==-1) {
+                if(href[0]=="/") {
+                    href = LG.prepareFullURL(href);
+                    if(typeof LG.tempURLObject[href]=="undefined") {
+                        LG.tempURLObject[href] = {};
+                        LG.tempURLObject[href].visited = 0;
+                        LG.finalOutputArray.push(href);
+                                            
+                    }
+                }
+            }
+        }
+    });
+});
+LG.grab.startIteration = (function() {
+    if(typeof LG.finalOutputArray[LG.urlCounter] != "undefined") {
+        if(LG.validate.url(LG.finalOutputArray[LG.urlCounter])) {
+            if(LG.validate.isInternalUrl(LG.finalOutputArray[LG.urlCounter])) {
+                console.log((LG.urlCounter+1)+"> "+LG.finalOutputArray[LG.urlCounter]);
+                LG.page.open(LG.finalOutputArray[LG.urlCounter], function(status) {console.log("piklu");
+                    if (status == 'success') {
+                        LG.tempURLObject[LG.finalOutputArray[LG.urlCounter]].visited = 1;
+                        LG.grab.allURLsOfPage();
+                    } else {
+                        console.log("****** Link cannot be opened may be broken or slow internet connectivity, will retry now ******");
+                    }
+                    LG.urlCounter += 1;
+                });
+            } else {
+
+            }
+        }
+    } else {
+        clearInterval(LG.timer);
+        LG.finalize.prepareFinalOutput();
+    }
+});
 LG.grab.begin = (function() {
     LG.finalOutputArray.push(Object.keys(LG.tempURLObject)[0]);
-    
+    LG.timer = setInterval(function() {
+        LG.grab.startIteration();    
+    }, 10000);
 });
 
 // set the values from command line input
