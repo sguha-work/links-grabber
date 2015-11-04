@@ -87,7 +87,7 @@ LG.readContents = (function(fcobj){
       //console.log('test - 1 ' + data.length);
 
       //for(var i=0; i<data.length; i++) 
-      LG.fs.write('output.txt',  data);
+     // LG.fs.write('output.txt',  data[i]);
 
     
 
