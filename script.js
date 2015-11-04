@@ -84,12 +84,12 @@ LG.readContents = (function(fcobj){
 
         });
 
-      /*console.log('test - 1 ' + data.length);
+      //console.log('test - 1 ' + data.length);
 
-      for(var i=0; i<data.length; i++) 
-      LG.fs.write('output.txt',  data[i] +  '\n', 'a+');
+      //for(var i=0; i<data.length; i++) 
+      LG.fs.write('output.txt',  data);
 
-      phantom.exit();*/
+    
 
       if( data && data !== null )
       {
@@ -114,7 +114,7 @@ LG.openLink = (function() {
     if ( LG.init && LG.counter >= LG.linkArray.length) {
 
         for(var i=0; i<data.length; i++) 
-        LG.fs.write('output.txt',  data[i] +  '\n', 'a+');
+        LG.fs.write('output-final.txt',  data[i] +  '\n', 'a+');
         phantom.exit();
 
     }
