@@ -46,6 +46,7 @@ LG.prepareFullURL = (function(url){
 LG.linkArray = [];
 LG.counter = -1;
 LG.init = false;
+LG.pointer = 0;
 
 LG.removeDuplicate = (function(currentData){
 
@@ -58,6 +59,22 @@ LG.removeDuplicate = (function(currentData){
     } 
 
     return uniqLinks;  
+});
+
+LG.reRunProgram = (function(){
+  var fileData = LG.fs.read('stack.json');
+  
+  if(fileData !== "")
+  { 
+    fileData     = JSON.parse(fileData); 
+    LG.counter   = fileData.pointer ;
+    LG.pointer   = fileData.pointer;
+    LG.linkArray = fileData.stack;
+    LG.openLink();
+  } else {
+    LG.openLink();
+  }
+
 });
 
 LG.readContents = (function(fcobj){
@@ -74,7 +91,7 @@ LG.readContents = (function(fcobj){
                 href = anchors[index].href;
                 
 
-                if(href !== "" && href !== 'javascript:void(0)') 
+                if(href !== "" && href !== 'javascript:void(0)' && typeof href !== 'object') 
                 {
 
                   links.push(href);
@@ -100,12 +117,8 @@ LG.readContents = (function(fcobj){
        data = LG.removeDuplicate(data);
        var newData = [];
        newData = newData.concat(LG.linkArray);
-
-       LG.fs.write('output.txt',  newData);
-       
        newData = newData.concat(data); 
        LG.linkArray = LG.removeDuplicate(newData);
-       //console.log('-- LG.linkArray length --> '+ LG.linkArray.length +'   -- pointer --> ' + LG.counter + '-----------');
        LG.openLink();
 
       }
@@ -119,13 +132,26 @@ LG.openLink = (function() {
     LG.counter += 1;
     if ( LG.init && LG.counter >= LG.linkArray.length) {
 
-        for(var i=0; i<data.length; i++) 
-        LG.fs.write('output-final.txt',  data[i] +  '\n', 'a+');
+        for(var i=0; i<LG.linkArray.length; i++) 
+        LG.fs.write('output-final.txt',  LG.linkArray[i] +  '\n', 'a+');
         phantom.exit();
 
     }
+    
     LG.init = true;
-    console.log('-- LG.linkArray length --> '+ LG.linkArray.length +'   -- pointer --> ' + LG.counter + '-----------');
+
+   if(LG.counter === (LG.pointer + 450))
+   {
+    var obj = {};
+    obj.pointer = LG.counter - 1;
+    obj.stack = LG.linkArray;
+    LG.fs.write('stack.json', JSON.stringify(obj, null, 4));
+    phantom.exit();
+   } 
+
+  
+
+    console.log('\n-- LG.linkArray length --> '+ LG.linkArray.length +'   -- pointer --> ' + LG.counter + '-----------');  
     console.log("** Openning "+ (LG.counter + 1) +" link " + LG.linkArray[LG.counter] + " **");
     page.open(LG.linkArray[LG.counter], function(status) {
         if (status == 'success') {
@@ -177,7 +203,7 @@ LG.grabCommandLine = (function(){
 
 (function(){
   LG.grabCommandLine ();
-  LG.openLink();  
-    
+  //LG.openLink();  
+  LG.reRunProgram();   
 })();
 
