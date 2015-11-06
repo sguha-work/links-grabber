@@ -47,6 +47,7 @@ LG.linkArray = [];
 LG.counter = -1;
 LG.init = false;
 LG.pointer = 0;
+LG.timer = "";
 
 LG.removeDuplicate = (function(currentData){
 
@@ -63,7 +64,7 @@ LG.removeDuplicate = (function(currentData){
 
 LG.reRunProgram = (function(){
   var fileData = LG.fs.read('stack.json');
-  
+
   if(fileData !== "")
   { 
     fileData     = JSON.parse(fileData); 
@@ -77,9 +78,27 @@ LG.reRunProgram = (function(){
 
 });
 
+LG.setTimer = (function() {
+    LG.clearTimer();
+    LG.timer = setTimeout(function(){ 
+    LG.counter -=1;  
+    LG.openLink(); 
+    }, 25000);
+
+});
+
+
+LG.clearTimer = (function() {
+
+   clearTimeout(LG.timer);
+
+});
+
+
 LG.readContents = (function(fcobj){
-     
-      var data = page.evaluate(function() {
+      console.log("** Openning "+ (LG.counter + 1) +" link " + LG.linkArray[LG.counter] + " **");
+      var data ;
+      data= page.evaluate(function() {
 
             var anchors = document.getElementsByTagName('a'), 
             index, 
@@ -110,17 +129,23 @@ LG.readContents = (function(fcobj){
       //LG.fs.write('output.txt',  data);
 
     
+      console.log(data.length);
 
       if( data && data !== null )
       {
-
        data = LG.removeDuplicate(data);
        var newData = [];
        newData = newData.concat(LG.linkArray);
        newData = newData.concat(data); 
        LG.linkArray = LG.removeDuplicate(newData);
+       console.log('.. finish ..');
+       LG.clearTimer();
        LG.openLink();
-
+      } else {
+        console.log('.. retry ..');
+        LG.clearTimer();
+        LG.counter -=1;
+        LG.openLink();
       }
 
 }); //end of LG.readContent
@@ -128,6 +153,8 @@ LG.readContents = (function(fcobj){
 
 
 LG.openLink = (function() {
+
+   LG.setTimer(); 
    
     LG.counter += 1;
     if ( LG.init && LG.counter >= LG.linkArray.length) {
@@ -140,7 +167,7 @@ LG.openLink = (function() {
     
     LG.init = true;
 
-   if(LG.counter === (LG.pointer + 450))
+   if(LG.counter === (LG.pointer + 100))
    {
     var obj = {};
     obj.pointer = LG.counter - 1;
@@ -152,14 +179,14 @@ LG.openLink = (function() {
   
 
     console.log('\n-- LG.linkArray length --> '+ LG.linkArray.length +'   -- pointer --> ' + LG.counter + '-----------');  
-    console.log("** Openning "+ (LG.counter + 1) +" link " + LG.linkArray[LG.counter] + " **");
+    
     page.open(LG.linkArray[LG.counter], function(status) {
         if (status == 'success') {
             LG.readContents();
         } else {
             LG.counter -= 1;
             console.log("** Link cannot be opened may be broken or slow internet connectivity, will retry now **");
-
+            LG.clearTimer();
             setTimeout(function() {
                 LG.openLink();
             }, 10000);      
